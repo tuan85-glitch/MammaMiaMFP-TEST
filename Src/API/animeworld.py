@@ -52,7 +52,7 @@ async def get_mp4(anime_url,ismovie,episode,client):
         episode_page = soup.find('a', {'data-episode-num':episode })
         if episode_page is None:
             return None
-        episode_page = f'https://animeworld.{AW_DOMAIN}{episode_page["href"]}'
+        episode_page = f'https://animeunity.{AW_DOMAIN}{episode_page["href"]}'
         response = await client.get(ForwardProxy + episode_page,allow_redirects=True, impersonate = "chrome124", proxies=proxies)
         soup = BeautifulSoup(response.text,'lxml')
 
@@ -75,14 +75,14 @@ async def old_search(showname,date,ismovie,episode,client):
     }
 
     headers = {
-        'authority': f'www.animeworld.{AW_DOMAIN}',
+        'authority': f'www.animeunity.{AW_DOMAIN}',
         'accept': 'application/json, text/javascript, */*; q=0.01',
         'accept-language': 'it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7',
          # 'content-length': '0',
          # 'cookie': 'sessionId=s%3AtGSRfYcsIoaeV0nqFJgN69Zxixb_-uJU.fcNz%2FsJBiiP8v8TwthMN9%2FmynWFciI5gezZuz8CltyQ',
          'csrf-token': 'oKFK43s4-BzfqPX27RlAORUd-iyiAfXyfDAo',
-         'origin': f'https://www.animeworld.{AW_DOMAIN}',
-         'referer': f'https://www.animeworld.{AW_DOMAIN}/',
+         'origin': f'https://www.animeunity.{AW_DOMAIN}',
+         'referer': f'https://www.animeunity.{AW_DOMAIN}/',
          'sec-ch-ua': '"Not-A.Brand";v="99", "Chromium";v="124"',
          'sec-ch-ua-mobile': '?0',
          'sec-ch-ua-platform': '"Android"',
@@ -97,7 +97,7 @@ async def old_search(showname,date,ismovie,episode,client):
         'keyword': showname,
     }
 
-    response = await client.post(f'https://www.animeworld.{AW_DOMAIN}/api/search/v2', params=params, cookies=cookies, headers=headers,allow_redirects=True, impersonate = "chrome120")
+    response = await client.post(f'https://www.animeunity.{AW_DOMAIN}/api/search/v2', params=params, cookies=cookies, headers=headers,allow_redirects=True, impersonate = "chrome120")
 
     data = json.loads(response.text)
     final_urls = []
@@ -110,7 +110,7 @@ async def old_search(showname,date,ismovie,episode,client):
         if release_date == date:
             identifier = anime["identifier"]
             link = anime["link"]
-            anime_url = f'https://animeworld.{AW_DOMAIN}/play/{link}.{identifier}'
+            anime_url = f'https://animeunity.{AW_DOMAIN}/play/{link}.{identifier}'
             final_url = await get_mp4(anime_url,ismovie,episode,client)
             final_urls.append(final_url)
             break
@@ -118,7 +118,7 @@ async def old_search(showname,date,ismovie,episode,client):
     params = {
         'keyword': showname,
     }
-    response = await client.post(ForwardProxy + f'https://www.animeworld.{AW_DOMAIN}/api/search/v2', params=params, cookies=cookies, headers=headers, allow_redirects=True, impersonate = "chrome124", proxies = proxies)
+    response = await client.post(ForwardProxy + f'https://www.animeunity.{AW_DOMAIN}/api/search/v2', params=params, cookies=cookies, headers=headers, allow_redirects=True, impersonate = "chrome124", proxies = proxies)
     data = json.loads(response.text)
     for anime in data["animes"]:
         release_date = anime["release"]
@@ -129,7 +129,7 @@ async def old_search(showname,date,ismovie,episode,client):
         if release_date == date:
             identifier = anime["identifier"]
             link = anime["link"]
-            anime_url = f'https://animeworld.{AW_DOMAIN}/play/{link}.{identifier}'
+            anime_url = f'https://animeunity.{AW_DOMAIN}/play/{link}.{identifier}'
             final_url = await get_mp4(anime_url,ismovie,episode,client)
             final_urls.append(final_url)
             break
@@ -139,12 +139,12 @@ async def search(showname,date,ismovie,episode,client):
     search_year = date[:4] 
     headers = random_headers.generate()
 
-    response = await client.get(ForwardProxy + f'https://www.animeworld.so/filter?year={search_year}&sort=2&keyword={showname}',allow_redirects=True, impersonate = "chrome124", headers = headers, proxies = proxies)
+    response = await client.get(ForwardProxy + f'https://www.animeunity.so/filter?year={search_year}&sort=2&keyword={showname}',allow_redirects=True, impersonate = "chrome124", headers = headers, proxies = proxies)
     soup = BeautifulSoup(response.text,'lxml')
     anime_list = soup.find_all('a', class_=['poster', 'tooltipstered'])
     final_urls = []
     for anime in anime_list:
-        anime_info_url = f'https://www.animeworld.{AW_DOMAIN}/{anime["data-tip"]}'
+        anime_info_url = f'https://www.animeunity.{AW_DOMAIN}/{anime["data-tip"]}'
         response = await client.get(ForwardProxy + anime_info_url,allow_redirects=True, impersonate = "chrome124", proxies = proxies)
         pattern = r'<label>Data di uscita:</label>\s*<span>\s*(.*?)\s*</span>'
         match = re.search(pattern, response.text, re.S)
@@ -154,14 +154,14 @@ async def search(showname,date,ismovie,episode,client):
         release_date = datetime.datetime.strptime(release_date, "%d %B %Y")
         release_date = release_date.strftime("%Y-%m-%d")
         if release_date == date:
-            anime_url = f'https://www.animeworld.{AW_DOMAIN}{anime["href"]}'
+            anime_url = f'https://www.animeunity.{AW_DOMAIN}{anime["href"]}'
             final_url = await get_mp4(anime_url,ismovie,episode,client)
             if final_url:
                 final_urls.append(final_url)
 
     return final_urls
 
-async def animeworld(id,client):
+async def animeunity(id,client):
     try:
         print(id)
         kitsu_id = id.split(":")[1]
@@ -179,17 +179,17 @@ async def animeworld(id,client):
         final_urls = await search(showname,date,ismovie,episode,client)
         return final_urls
     except:
-        print("Animeworld failed")
+        print("animeunity failed")
         return None
 
-async def test_animeworld():
+async def test_animeunity():
     async with AsyncSession() as client:
         # Replace with actual id, for example 'anime_id:episode' format
         test_id = "kitsu:11407"  # This is an example ID format
-        results = await animeworld(test_id, client)
+        results = await animeunity(test_id, client)
         print(results)
 
 if __name__ == "__main__":
     from curl_cffi.requests import AsyncSession
     import asyncio
-    asyncio.run(test_animeworld())
+    asyncio.run(test_animeunity())
